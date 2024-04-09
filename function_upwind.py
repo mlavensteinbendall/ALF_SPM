@@ -35,40 +35,7 @@ def UPW_SPM(Smax, Tmax, ds, dt,ntag,filename):
 
     # print(np.size(N[0,0]))
 
-    # for t in range(0, len(time) -1):
-
-    #     for s in range(1,len(size)): 
-            # print(s)
-            # time splitting -- to solve numerically we are going to split this into 3 parts
-
-            # # step 1 -- half time step
-            # N[t+1,s] = - gp[s] * N[t,s] * 2/dt + N[t,s]
-
-            # # step 2 -- time step 
-            # N[t+1,s] = N[t,s] - dt * (g[s]*(N[t,s]-N[t,s-1])/ds + gp[s]* N[t,s])
-
-            # # step 3 -- half time step
-            # N[t+1,s] = - gp[s] * N[t,s] * 2/dt + N[t,s]
-
-
-    # Here we have u_t + (gu)_s = 0
-    # for t in range(0, len(time) -1):
-
-    #     for s in range(1,len(size)): 
-    #         Ntemp = 0
-
-    #         Ntemp = N[t,s] - dt * (( g[s] * (N[t,s] - N[t,s-1])/ds ) + gp[s] * N[t,s] )
-    #         # Ntemp = (1 - (dt/ds * g[s]) - dt * gp[s] ) * N[t,s] + ( g[s] * dt/ds * N[t,s-1]) 
-
-    #         N[t+1,s] = Ntemp
-
-
-    # for t in range(0, len(time) - 1):
-
-    #     for s in range(1,len(size)): 
-    #         N[t+1,s] = N[t,s] - dt * ( g[s] * (N[t,s] - N[t,s-1]) / ds + gp[s] * N[t,s])
-
-
+# WITH gp - Steve's time splitting  on u_t + (g * u)_s = -mu * u
     for t in range(0, len(time) -1):
 
         for s in range(1,len(size)): 
@@ -78,18 +45,13 @@ def UPW_SPM(Smax, Tmax, ds, dt,ntag,filename):
             Ntemp = N[t,s] * np.exp(mu[s] * dt/2)
 
             # step 2 -- time step 
-            # Ntemp = Ntemp - dt * ((g[s]*(Ntemp - N[t,s-1])/ds) + gp[s]* Ntemp)
-            # Ntemp = N[t,s] - dt * (( g[s] * (N[t,s] - N[t,s-1])/ds ) + gp[s] * N[t,s] )
-            # Ntemp = (1 - (dt/ds * g[s]) - dt * gp[s] ) * N[t,s] + ( g[s] * dt/ds * N[t,s-1]) 
-
-            Ntemp = N[t,s] - dt * ( g[s] * (N[t,s] - N[t,s-1])/ds )
+            Ntemp = Ntemp - dt * ((g[s]*(Ntemp - N[t,s-1])/ds) + gp[s]* Ntemp)
 
             # step 3 -- half time step
             N[t+1,s] = Ntemp * np.exp(mu[s] * dt/2)
-            # N[t+1,s] = Ntemp * np.exp(( -mu[s] - gp[s] ) * dt/2)
 
 
-# on the board time splitting
+# WITH gp - on the board time splitting
     # for t in range(0, len(time) -1):
 
     #     for s in range(1,len(size)): 
@@ -105,7 +67,7 @@ def UPW_SPM(Smax, Tmax, ds, dt,ntag,filename):
     #         # step 3 -- half time step
     #         N[t+1,s] = Ntemp * np.exp(( -mu[s] - gp[s] ) * dt/2)
 
-# time splitting with u_t + g * u_s = - mu * u
+# # WITHOUT gp --  time splitting with u_t + g * u_s = - mu * u 
 #     for t in range(0, len(time) -1):
 
 #         for s in range(1,len(size)): 
@@ -125,12 +87,10 @@ def UPW_SPM(Smax, Tmax, ds, dt,ntag,filename):
     total_population_initial = np.sum(N[0, :])
     total_population_middle = np.sum(N[int((Ntime-1)/2), :])
     total_population_final = np.sum(N[Ntime -1, :])
+    
     print('total population at t = 0 : ' + str(total_population_initial))
     print('total population at t = '+ str(int(Ntime/2)) +' : ' + str(total_population_middle))
     print('total population at t = ' + str(Ntime) + ' : ' + str(total_population_final))
-
-    totalPop = np.trapz(N[0,:])
-    print(totalPop)
 
 
 
