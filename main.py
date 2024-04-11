@@ -3,61 +3,59 @@
 
 import numpy as np
 from function_upwind import UPW_SPM
-from convergence_ds import convergence_ds
+from convergence_ds import convergence_ds_plt
+from function_conservation import conservation_plt
 
 # initial conditions
 Smax = 15
-Tmax = 2
+Tmax = 10
 
 dt = 0.01
-# ds = np.zeros([2])
+ds = np.zeros([5])
 # ds[0] = 0.9 * dt
 # ds[1] = 0.9 * dt / 2
-ds = 0.9 * dt
+# ds[2] = 0.9 * dt / 4
+
+ds[4] = 0.15
+ds[3] = 0.2
+ds[2] = 0.3
+ds[1] = 0.4
+ds[0] = 0.5
+
+# ds = 0.9 * dt
 # Ntest =  range(len(ds))
-filename = 'test'
+# filename = 'ds_convergence'
 
 # initalize arrays
-Nsize = int(Smax/ds) + 1
 Ntime = int(Tmax/dt) + 1
-size = np.linspace(0,Smax, Nsize) # analytical solutions exist starting at 0.7
 time = np.linspace(0,Tmax, Ntime)
 
-data = np.zeros([Ntime,Nsize])
 
-data = UPW_SPM(size, time, ds, dt)
+for i in range(len(ds)):
 
-
-
-# for i in 1:
-
-#     print('Entering loop ' + str(i))
-
-#     data = UPW_SPM(size, time, ds, dt)
-
-#     np.savetxt(filename + 'upwind_num_' + str(i) + '.txt', data)
-
-#     print('S Loop ' + str(i) + ' Complete.')
-
-    # with open(filename + 'upwind_num_' + str(i) + '.txt', 'w') as file: # Initialise an outputter file (safe)
+    print('Entering loop ' + str(i))
 
 
+    # initalize arrays
+    Nsize = int(Smax/ds[i]) + 1
+    size = np.linspace(0,Smax, Nsize) # analytical solutions exist starting at 0.7
 
+    data = 0 
+    data = np.zeros([Ntime,Nsize])
 
+    data = UPW_SPM(size, time, ds[i], dt)
 
+    np.savetxt('ds_convergence/upwind_num_'+ str(i) +'.txt', data)  # save data to file
 
-# print(np.shape(data))
-# convergence_ds(size, time, ds, dt, Ntest, filename, data)
+    print('Loop ' + str(i) + ' Complete.') # Progress update, loop end.
 
+    # Plot numerical total population and error with true solution
+    # conservation_plt(data, size, time, ds[i])
 
-# filename = 'ds_convergence/' # Folder name for data storage.
-# # filename = 'dt_convergence/' # Folder name for data storage.
+convergence_ds_plt(Smax, time, ds)
 
-# # Execute the model for each of the set of pairs of values ds/dt.
-# for i,dsi in enumerate(dsvals):
+    # beep = np.loadtxt('ds_convergence/upwind_num_'+ str(i) +'.txt') # Load in relevant data.
 
-#     print('Entering loop ' + str(i)) # Progress update, loop start.
-#     # print("CFL " + str(dt) + "<" + str(np.exp(-0.4)*dsi)) # it seems to be meeing the CFL condition
-#     # LW_SPM(dsi,dtvals[i],i,filename) # Model - ds run.
-#     LW_SPM(dsi,dt,i,filename) # Model - dt run.
-#     print('S Loop ' + str(i) + ' Complete.') # Progress update, loop end.
+    # print(np.shape(beep))
+
+#   convergence_ds(size, time, ds, dt, Ntest, filename, data)

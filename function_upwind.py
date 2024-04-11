@@ -73,6 +73,11 @@ def UPW_SPM(size, time, ds, dt):
 
 
 
+
+
+
+
+
 # Plots the numerical solution at multiple points in time
     for t_index, N_t in enumerate(N):
         if t_index % 100 == 0:  # Plot only if time index is a multiple of 10
@@ -94,6 +99,11 @@ def UPW_SPM(size, time, ds, dt):
     plt.plot()
 
 
+
+
+
+
+
 # MOOOVVVE TO CONSERVATION FILE
 # check conservation -- need to have ds * sum
     # total_population = np.zeros([len(time)])
@@ -113,32 +123,32 @@ def UPW_SPM(size, time, ds, dt):
     # # plt.grid(True)
     # plt.show()
 
-    totalPop_num = np.zeros([len(time)])
-    totalPop_sol = np.zeros([len(time)])
+    # totalPop_num = np.zeros([len(time)])
+    # totalPop_sol = np.zeros([len(time)])
 
-    for t in range(len(time)):
-        totalPop_num[t] = ds * np.sum(N[t,:])
-        totalPop_sol[t] = ds * np.sum(sol[t,:])
+    # for t in range(len(time)):
+    #     totalPop_num[t] = ds * np.sum(N[t,:])
+    #     totalPop_sol[t] = ds * np.sum(sol[t,:])
 
-    error = np.abs(( totalPop_num - totalPop_sol)) 
-    print(error)
-    print('numerical t end : ' + str(totalPop_num[-1]))
-    print('analytical t end : ' + str(totalPop_sol[-1]))
+    # error = np.abs(( totalPop_num - totalPop_sol)) 
+    # print(error)
+    # print('numerical t end : ' + str(totalPop_num[-1]))
+    # print('analytical t end : ' + str(totalPop_sol[-1]))
 
-    # Plot total population over time
-    plt.plot(time, error)
-    plt.xlabel('Time')
-    plt.ylabel('Absolute Error |numerical - true solution|')
-    plt.title('Error of Total Population over Time')
-    # plt.grid(True)
-    plt.show()
+    # # Plot total population over time
+    # plt.plot(time, error)
+    # plt.xlabel('Time')
+    # plt.ylabel('Absolute Error |numerical - true solution|')
+    # plt.title('Error of Total Population over Time')
+    # # plt.grid(True)
+    # plt.show()
 
-    plt.plot(time, totalPop_num)
-    plt.xlabel('Time')
-    plt.ylabel('total pop')
-    plt.title('Total Population over Time')
-    # plt.grid(True)
-    plt.show()
+    # plt.plot(time, totalPop_num)
+    # plt.xlabel('Time')
+    # plt.ylabel('total pop')
+    # plt.title('Total Population over Time')
+    # # plt.grid(True)
+    # plt.show()
 
     return N
     
