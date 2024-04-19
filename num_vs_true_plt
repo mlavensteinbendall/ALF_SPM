@@ -1,0 +1,25 @@
+import numpy as np
+import matplotlib.pyplot as plt 
+
+def num_analytical_plt(data, size, time):
+
+    #analytical solution 
+    sol = np.zeros([len(time),len(size)])
+
+    for i_t in range(0, len(time)):
+        # Calculate the analytical solution
+        sol[i_t,:] = np.exp(-(size - ( time[i_t] + 5))**2)# g(s) = exp(-s/10), mu(s) = 0
+
+
+    # Plots the numerical solution at multiple points in time
+    for t_index, n_t in enumerate(data):
+        if t_index % 350 == 0:  # Plot only if time index is a multiple of 10
+            plt.plot(size, data[t_index,:], label=f'Numerical at time {t_index }', linestyle='--')
+            plt.plot(size, sol[t_index,:], label=f'Analytical at time {t_index }', linestyle='-')
+
+    plt.axhline(y=1, color='r', linestyle='--', label='y=1')
+    plt.xlabel('Age')
+    plt.ylabel('Population')
+    plt.title('Population by Age')
+    plt.legend()
+    plt.show()

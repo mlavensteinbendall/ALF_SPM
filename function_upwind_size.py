@@ -19,8 +19,8 @@ def UPW_SPM(size, time, ds, dt):
     # mu = size
 
     # analytical derivative of growth rate !! ignore for right now !!
-    gp = np.zeros([len(size)])
-    gp[:] = - g[:]/10
+    gp = np.ones([len(size)])
+    # gp[:] = - g[:]/10
 
     # inital condition -- population at t=0
     N = np.zeros([len(time),len(size)])

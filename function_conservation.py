@@ -1,28 +1,39 @@
 import numpy as np # Numpy for numpy
 import matplotlib.pyplot as plt
-from function_upwind import UPW_SPM
+from function_upwind_size import UPW_SPM
+
+def trapezoidal_rule(fx, dx):
+
+    fx_sum = np.sum(fx[1:-1])
+
+    result = dx * ( (fx[0] + fx[-1]) / 2 + fx_sum)
+
+    return result
+
 
 def conservation_plt(data, size, time, ds):
 
     totalPop_num = np.zeros([len(time)])
     totalPop_sol = np.zeros([len(time)])
 
-     #analytical solution 
+    # analytical solution 
     sol = np.zeros([len(time),len(size)])
 
-    for t in range(0, len(time)):
-        for s in range(0, len(size)):
-            # Calculate the analytical solution
-            c = 1/10
-            Y = 1/c * np.log(np.exp(size[s]*c) - time[t]*c)  # g(s) = exp(-s/10)
-            phi = np.exp(-((Y - 5) / 1) ** 2)
-            sol[t,s] = phi * np.exp( c**2 * (Y -  np.log( c*time[t] + np.exp(Y) ) ) ) # g(s) = exp(-s/10), mu(s) = 0
+    c = 1
+    for i_t in range(0, len(time)):
+        # Calculate the analytical solution
+        sol[i_t,:] = np.exp(-(size - ( time[i_t] + 5))**2) * np.exp(-c * time[i_t]) # mu(s) = 0
 
-    print(np.shape(data))
 
     for t in range(len(time)):
-        totalPop_num[t] = ds * np.sum(data[t,:])
-        totalPop_sol[t] = ds * np.sum(sol[t,:])
+        # totalPop_num[t] = ds * np.sum(data[t,:])
+        # totalPop_sol[t] = ds * np.sum(sol[t,:])
+
+        # totalPop_num[t] = np.trapz(data[t,:], size, ds)
+        # totalPop_sol[t] = np.trapz(sol[t,:], size, ds)
+
+        totalPop_num[t] = trapezoidal_rule(data[t,:], ds)
+        totalPop_sol[t] = trapezoidal_rule(sol[t,:], ds)
 
     # Plot total population over time
     plt.plot(time, totalPop_num)
