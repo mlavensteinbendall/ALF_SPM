@@ -1,61 +1,85 @@
 import numpy as np # Numpy for numpy
 import matplotlib.pyplot as plt
 
-def convergence_dt_plt(Smax, Tmax, ds, dt):
+def convergence_dt_plt(Smax, Tmax, ds, dt, order, c):
 
-    Ntest = len(dt)
+    Ntest = len(ds)
+    print(Ntest)
 
-    Norm2 = np.zeros([Ntest-1])
-    NormMax = np.zeros([Ntest-1])
+    Norm2 = np.zeros([Ntest])
+    NormMax = np.zeros([Ntest])
 
-    L2norm = np.zeros([Ntest-2])
-    LMaxnorm = np.zeros([Ntest-2])
+    L2norm = np.zeros([Ntest])
+    LMaxnorm = np.zeros([Ntest])
 
 
-    for i in range(0, Ntest-1):
+    for i in range(0, Ntest):
 
-        Nsize   = int(Smax/ds[i+1])+1
-        size    = np.zeros([Nsize])
-        size    = np.linspace(0,Smax,Nsize) # Create an array of those sizes.
+        Nage = int(Smax/ds[i])+1
+        age = np.zeros([Nage])
+        age = np.linspace(0, Smax, Nage) # Create an array of those sizes.
 
-        data1   = np.loadtxt('ds_convergence/upwind_num_' + str(i) + '.txt') # Load in relevant data.
-        data2   = np.loadtxt('ds_convergence/upwind_num_' + str(i+1) + '.txt') # Load in relevant data.
+        n = int(Tmax/dt[i]) + 1 # Time-step of comparison.
+        Tend = n*dt[i] # Get the associated timepoint value.
 
-        # Calculate the equivilent 
-        tinterest = 0.5 # Define the time where the calculations are compared.
-        n1      = int(tinterest/dt[i]) # Get fine-data time-step.
-        n2      = int(tinterest/dt[i+1]) # Get corse-data time-step.
+        data = np.zeros([int(Tmax/ds[i])+1, Nage])
+        sol = np.zeros([Nage])
+
+        data = np.loadtxt('ds_convergence/upwind_num_' + str(i) + '.txt') # Load in relevant data.
+
+        # Analyticial solution -- changes for what ds is
+        sol = np.exp(-(age - ( Tend + 5))**2) * np.exp(-c * Tend)          # mu(s) = 0
+        
+        # # plt data vs sol
+        # plt.plot(age,data[-1,:]) 
+        # plt.plot(age,sol) # looks right
+        # plt.show()
 
         # Solve for L-2 and L-max
-        Norm2    = ( ( 1 / len(size) ) * np.sum( ( data1[n1,0::2] - data2[n2,:] ) **2 ) ) **0.5 # L2 error.
-        NormMax  = np.max( np.abs( data1[n1,0::2] - data2[n2,:] ) )                             # L-Max error.
+        Norm2[i]    = ( ( 1 / Nage ) * np.sum( np.abs( data[n-1,:] - sol[:] ) **2 ) ) **0.5  # L2 error.
+        NormMax[i]  = np.max( np.abs( data[n-1,:] - sol[:] ) )                         # L-Max error.
 
-        if i > 0 :
-            # Loop through the remaining datasets.
-            for ii in range(1,Ntest):
-                L2norm[ii-1]    = np.log( Norm2[ii-1]   / Norm2[ii] )   / np.log( ds[ii-1] / ds[ii] )
-                LMaxnorm[ii-1]  = np.log( NormMax[ii-1] / NormMax[ii] ) / np.log( ds[ii-1] / ds[ii] )
+
+    # Calculates the L norms -- comparing with the last (Note: ds is increasing)
+    for ii in range(0, Ntest - 1):
+        L2norm[ii+1]    = np.log( Norm2[ii+1]   / Norm2[ii] )   / np.log( dt[ii+1] / dt[ii] )
+        LMaxnorm[ii+1]  = np.log( NormMax[ii+1] / NormMax[ii] ) / np.log( dt[ii+1] / dt[ii] )
 
 
 
     for i in range(0, Ntest):
 
-        print('For dt ='    + str( round( dt[i],10      ) ) )
-        print('Norm 2 : '   + str( round( Norm2[i], 10  ) ) )
-        print('Norm inf : ' + str( round( NormMax[i], 10) ) )
+        print('For ds ='    + str( round( ds[i],10      ) ) + ' and dt ='    + str( round( dt[i],10      ) ) )
+        print('Norm 2 error: '   + str( round( Norm2[i], 10  ) ) )
+        print('Norm inf error: ' + str( round( NormMax[i], 10) ) )
 
         if i > 0:
-            print('L2 q error: '     + str( round( L2norm[ii-1]   , 10    ))) # L2 q estimate.
-            print('LMax q error: '   + str( round( LMaxnorm[ii-1] , 10    ))) # L-Max q estimate.
+            print('L2 q order: '     + str( round( L2norm[i-1]   , 10    ))) # L2 q estimate.
+            print('LMax q order: '   + str( round( LMaxnorm[i-1] , 10    ))) # L-Max q estimate.
             print(' ')
 
-    # Plot the log-log for the errors.
-    plt.loglog(dt, Norm2, label='Norm2')
-    plt.loglog(dt, NormMax, label='NormMax')
-    plt.loglog(dt, dt**1, label='order-1')
+    # plt.figure(figsize=(8, 4))
 
-    plt.xlabel('dt')
+    # Plot the log-log for the errors.
+    plt.loglog(ds, Norm2, label='Norm2')
+    plt.loglog(ds, NormMax, label='NormMax')
+    plt.loglog(ds, ds**(order), label=f'order-{order }')
+    # plt.loglog(ds, ds**1, label=f'order-{1 }')
+
+    plt.xlabel(r'$\Delta s$')
     plt.ylabel('Norm')
-    plt.title('Convergence based on dt')
+    plt.title('Convergence based on varying ' + r'$\Delta s$' + ' and ' + r'$\Delta t$')
     plt.legend()
+
+    # Convert ds array values to a string
+    ds_values_str = '_'.join(map(str, np.round(ds, 3) ))
+    dt_values_str = '_'.join(map(str, np.round(dt, 3)))
+
+    # Save the plot to a file -- labels with da values and dt 
+    plt.savefig('ds_plot/varied_dt/plot_conv_mu_' + str(c) + '_ds_' + ds_values_str + '_dt_' + dt_values_str + '_order_'+ str(order)  +'.png', dpi=300)  
+ 
     plt.show()
+
+    combine = [Norm2, L2norm, NormMax, LMaxnorm]
+
+    return combine

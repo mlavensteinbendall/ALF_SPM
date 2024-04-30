@@ -1,9 +1,9 @@
 import numpy as np # Numpy for numpy
 import matplotlib.pyplot as plt
 
-def convergence_da_plt(age_max, time_max, da, dt, order):
+def convergence_da_plt(age_max, time_max, da, dt, order, c):
 
-    n = 1000 # Time-step of comparison.
+    n = int(time_max/dt) + 1 # Time-step of comparison.
     Tend = n*dt # Get the associated timepoint value.
 
     # Tend = time_max
@@ -13,8 +13,8 @@ def convergence_da_plt(age_max, time_max, da, dt, order):
     Norm2 = np.zeros([Ntest])
     NormMax = np.zeros([Ntest])
 
-    L2norm = np.zeros([Ntest-1])
-    LMaxnorm = np.zeros([Ntest-1])
+    L2norm = np.zeros([Ntest])
+    LMaxnorm = np.zeros([Ntest])
 
 
     for i in range(0, Ntest):
@@ -29,7 +29,6 @@ def convergence_da_plt(age_max, time_max, da, dt, order):
         data = np.loadtxt('ds_convergence/upwind_num_' + str(i) + '.txt') # Load in relevant data.
 
         # Analyticial solution -- changes for what ds is
-        c = 0
         sol = np.exp(-(age - ( Tend + 5))**2) * np.exp(-c * Tend)          # mu(s) = 0
         
         # # plt data vs sol
@@ -38,42 +37,52 @@ def convergence_da_plt(age_max, time_max, da, dt, order):
         # plt.show()
 
         # Solve for L-2 and L-max
-        Norm2[i]    = ( ( 1 / Nage ) * np.sum( ( data[n,:] - sol[:] ) **2 ) ) **0.5  # L2 error.
-        NormMax[i]  = np.max( np.abs( data[n,:] - sol[:] ) )                         # L-Max error.
+        Norm2[i]    = ( ( 1 / Nage ) * np.sum( np.abs( data[n-1,:] - sol[:] ) **2 ) ) **0.5  # L2 error.
+        NormMax[i]  = np.max( np.abs( data[n-1,:] - sol[:] ) )                         # L-Max error.
 
 
-    # Calculates the L norms -- comparing with the last
+    # Calculates the L norms -- comparing with the last (Note: ds is increasing)
     for ii in range(0, Ntest - 1):
-        L2norm[ii]    = np.log( Norm2[ii]   / Norm2[ii+1] )   / np.log( da[ii] / da[ii+1] )
-        LMaxnorm[ii]  = np.log( NormMax[ii] / NormMax[ii+1] ) / np.log( da[ii] / da[ii+1] )
+        L2norm[ii+1]    = np.log( Norm2[ii+1]   / Norm2[ii] )   / np.log( da[ii+1] / da[ii] )
+        LMaxnorm[ii+1]  = np.log( NormMax[ii+1] / NormMax[ii] ) / np.log( da[ii+1] / da[ii] )
 
 
 
     for i in range(0, Ntest):
 
-        print('For ds ='    + str( round( da[i],10      ) ) )
-        print('Norm 2 : '   + str( round( Norm2[i], 10  ) ) )
-        print('Norm inf : ' + str( round( NormMax[i], 10) ) )
+        print('For ds ='            + str( round( da[i],        10  ) ) )
+        print('Norm 2 error: '      + str( round( Norm2[i],     10  ) ) )
+        print('Norm inf error: '    + str( round( NormMax[i],   10  ) ) )
 
         if i > 0:
-            print('L2 q error: '     + str( round( L2norm[i-1]   , 10    ))) # L2 q estimate.
-            print('LMax q error: '   + str( round( LMaxnorm[i-1] , 10    ))) # L-Max q estimate.
+            print('L2 q order: '    + str( round( L2norm[i-1]   , 10    ) ) ) # L2 q estimate.
+            print('LMax q order: '  + str( round( LMaxnorm[i-1] , 10    ) ) ) # L-Max q estimate.
             print(' ')
 
-    plt.figure(figsize=(8, 4))
+    # plt.figure(figsize=(8, 4))
 
     # Plot the log-log for the errors.
     plt.loglog(da, Norm2, label='Norm2')
     plt.loglog(da, NormMax, label='NormMax')
-    plt.loglog(da, da**order, label=f'order-{order }')
+    plt.loglog(da, da**(order), label=f'order-{order }')
     # plt.loglog(da, da**1, label=f'order-{1 }')
 
-    plt.xlabel('da')
+    plt.xlabel(r'$\Delta a$')
     plt.ylabel('Norm')
-    plt.title('Convergence based on da')
+    plt.title('Convergence based on ' + r'$\Delta a$')
     plt.legend()
+
+    # Convert ds array values to a string
+    ds_values_str = '_'.join(map(str, da))
+
+    # Save the plot to a file -- labels with da values and dt 
+    plt.savefig('ds_plot/fixed_dt/plot_conv_mu_'+ str(c) + '_ds_'+ ds_values_str + f'_dt_{dt }'+ '_order_' + str(order) +'.png', dpi=300)  
+
     plt.show()
 
+    combine = [Norm2, L2norm, NormMax, LMaxnorm]
+
+    return combine
 
     # # Plot the Analytical and Numerical Solution
     # plt.plot(size, sol, label='Analytical', linestyle='solid')

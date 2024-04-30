@@ -5,7 +5,7 @@ import numpy as np
 from function_upwind_size        import UPW_SPM
 from convergence_ds         import convergence_ds_plt
 from function_conservation  import conservation_plt
-from convergence_dt         import convergence_dt_plt
+from convergence_dt_no_exact_sol         import convergence_dt_plt
 
 # initial conditions
 Smax = 15
